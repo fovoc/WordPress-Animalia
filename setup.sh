@@ -28,6 +28,9 @@ apt-get install sudo
 sudo apt-get update
 sudo apt-get upgrade --force-yes --quiet --yes
 
+# Install git
+sudo apt-get install git --force-yes --quiet --yes
+
 ###----------------------------------------###
 ###  Install MariaDB and set root password
 ###----------------------------------------###
@@ -76,6 +79,8 @@ sudo apt-get install php5-common php5-mysql php5-xmlrpc php5-cgi php5-curl php5-
 ###  Configure Nginx
 ###----------------------------------------###
 
+service nginx stop
+
 cd ~
 wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/nginx.conf
 sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.old
@@ -97,5 +102,15 @@ sudo mv /etc/nginx/conf.d/restrictions.conf /etc/nginx/conf.d/restrictions.conf.
 sudo rm /etc/nginx/conf.d/restrictions.conf
 sudo mv restrictions.conf /etc/nginx/conf.d/restrictions.conf
 
-service nginx stop
+sudo mkdir /var/www
+sudo chown -R www-data:www-data /var/www
+
 service nginx start
+
+###----------------------------------------###
+###  Install WP-CLI
+###----------------------------------------###
+
+curl http://wp-cli.org/installer.sh > installer.sh
+sudo INSTALL_DIR='/usr/share/wp-cli' bash installer.sh
+sudo ln -s /usr/share/wp-cli/bin/wp /usr/bin/wp
