@@ -2,8 +2,15 @@
 ###  EDIT OPTIONS BELOW
 ###----------------------------------------###
 
-_MYSQL_ROOT_PASSWORD = "RANDOM-PASSWORD-HERE"
+# Enter your site's domain below.
 _ROOT_DOMAIN = "domain.com"
+
+# The MySQL ROOT password.
+_MYSQL_ROOT_PASSWORD = "RANDOM-PASSWORD-HERE"
+
+# Use _NGINX_VRSION = "development" below 
+# to use the latest, develoment version
+_NGINX_VERSION = "stable"
 
 ###----------------------------------------###
 ###  STOP EDITING,
@@ -44,3 +51,12 @@ sudo rm custom.cnf
 wget https://raw.github.com/aristath/WordPress-Animalia/master/mysql/custom.cnf
 sudo mv custom.cnf /etc/mysql/conf.d/custom.cnf
 sudo service mysql restart
+
+###----------------------------------------###
+###  Install Nginx
+###----------------------------------------###
+
+sudo nginx=$_NGINX_VERSION
+sudo add-apt-repository ppa:nginx/$nginx
+sudo apt-get update
+sudo apt-get install nginx --force-yes --quiet --yes
