@@ -12,6 +12,9 @@ _MYSQL_ROOT_PASSWORD = "RANDOM-PASSWORD-HERE"
 # to use the latest, develoment version
 _NGINX_VERSION = "stable"
 
+# Enter the number of CPUs that your VPS has.
+_CPUS_NUMBER = "1"
+
 ###----------------------------------------###
 ###  STOP EDITING,
 ###  DO NOT EDIT BELOW THIS LINE!
@@ -68,3 +71,31 @@ sudo apt-get install nginx --force-yes --quiet --yes
 sudo add-apt-repository ppa:ondrej/php5 --yes
 sudo apt-get update
 sudo apt-get install php5-common php5-mysql php5-xmlrpc php5-cgi php5-curl php5-gd php5-cli php5-fpm php-apc php5-dev php5-mcrypt --force-yes --quiet --yes
+
+###----------------------------------------###
+###  Configure Nginx
+###----------------------------------------###
+
+cd ~
+wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/nginx.conf
+sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.old
+sudo mv nginx.conf /etc/nginx/nginx.conf
+sed -i 's/WORKER_PROCESSES/$_CPUS_NUMBER/g' /etc/nginx/nginx.conf
+
+wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress.conf
+sudo mv /etc/nginx/conf.d/wordpress.conf /etc/nginx/conf.d/wordpress.conf.old
+sudo rm /etc/nginx/conf.d/wordpress.conf
+sudo mv wordpress.conf /etc/nginx/conf.d/wordpress.conf
+
+wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress-mu.conf
+sudo mv /etc/nginx/conf.d/wordpress-mu.conf /etc/nginx/conf.d/wordpress-mu.conf.old
+sudo rm /etc/nginx/conf.d/wordpress-mu.conf
+sudo mv wordpress-mu.conf /etc/nginx/conf.d/wordpress-mu.conf
+
+wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/restrictions.conf
+sudo mv /etc/nginx/conf.d/restrictions.conf /etc/nginx/conf.d/restrictions.conf.old
+sudo rm /etc/nginx/conf.d/restrictions.conf
+sudo mv restrictions.conf /etc/nginx/conf.d/restrictions.conf
+
+service nginx stop
+service nginx start
