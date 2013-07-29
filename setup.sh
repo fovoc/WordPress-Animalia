@@ -60,3 +60,11 @@ sudo nginx=$_NGINX_VERSION
 sudo add-apt-repository ppa:nginx/$nginx
 sudo apt-get update
 sudo apt-get install nginx --force-yes --quiet --yes
+
+###----------------------------------------###
+###  Install PHP-FPM
+###----------------------------------------###
+
+sudo add-apt-repository ppa:ondrej/php5 --yes
+sudo apt-get update
+sudo apt-get install php5-common php5-mysql php5-xmlrpc php5-cgi php5-curl php5-gd php5-cli php5-fpm php-apc php5-dev php5-mcrypt --force-yes --quiet --yes
