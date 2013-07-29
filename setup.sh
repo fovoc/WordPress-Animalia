@@ -142,4 +142,14 @@ echo "CREATE USER '_DB_USER'@'localhost' IDENTIFIED BY '$_DB_PASS';" > userdb.sq
 echo "GRANT ALL PRIVILEGES ON * . * TO '_DB_USER'@'localhost';" >> userdb.sql
 echo "FLUSH PRIVILEGES;" >> userdb.sql
 
-mysql -h "localhost" -u root "$_MYSQL_ROOT_PASSWORD" "$_DB_NAME" < "userdb.sql"`
+mysql -h "localhost" -u root "$_MYSQL_ROOT_PASSWORD" "$_DB_NAME" < "userdb.sql"
+
+###----------------------------------------###
+###  Download and extract WordPress
+###----------------------------------------###
+
+cd /var/www
+wget -O wordpress.tar.gz http://wordpress.org/latest.tar.gz
+tar -zxvf wordpress.tar.gz
+chown -R www-data:www-data /var/www/wordpress
+rm wordpress.tar.gz
