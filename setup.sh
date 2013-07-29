@@ -114,3 +114,32 @@ service nginx start
 curl http://wp-cli.org/installer.sh > installer.sh
 sudo INSTALL_DIR='/usr/share/wp-cli' bash installer.sh
 sudo ln -s /usr/share/wp-cli/bin/wp /usr/bin/wp
+
+###----------------------------------------###
+###  Create Database for WordPress,
+###  assign a user to that database
+###  and create a password for that user.
+###----------------------------------------###
+
+sudo apt-get install pwgen --force-yes --quiet --yes
+
+strong1=$(pwgen -1 -n 8 -s)
+dbname=$(perl -e 'print crypt($ARGV[0], "strong1")' $password)
+
+strong2=$(pwgen -1 -n 8 -s)
+dbusername=$(perl -e 'print crypt($ARGV[0], "strong2")' $password)
+
+strong3=$(pwgen -1 -n 8 -s)
+dbpassword=$(perl -e 'print crypt($ARGV[0], "strong3")' $password)
+
+_DB_NAME = $dbname
+
+_DB_USER = $dbusername
+
+_DB_PASS = $dbpassword
+
+echo "CREATE USER '_DB_USER'@'localhost' IDENTIFIED BY '$_DB_PASS';" > userdb.sql
+echo "GRANT ALL PRIVILEGES ON * . * TO '_DB_USER'@'localhost';" >> userdb.sql
+echo "FLUSH PRIVILEGES;" >> userdb.sql
+
+mysql -h "localhost" -u root "$_MYSQL_ROOT_PASSWORD" "$_DB_NAME" < "userdb.sql"`
