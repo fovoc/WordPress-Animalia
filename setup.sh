@@ -19,8 +19,9 @@ sudo apt-get update
 sudo apt-get upgrade --force-yes --quiet --yes
 
 ###----------------------------------------###
-###  Install & Customize MariaDB
+###  Install MariaDB and set root password
 ###----------------------------------------###
+
 sudo apt-get install software-properties-common --force-yes --quiet --yes
 sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
 sudo add-apt-repository 'deb http://ftp.osuosl.org/pub/mariadb/repo/10.0/ubuntu raring main'
@@ -33,3 +34,13 @@ echo "FLUSH PRIVILEGES;'" >> rootpass.txt
 sudo mysqld_safe --init-file=rootpass.txt &
 sudo service mysql restart
 sudo rm rootpass.txt
+
+###----------------------------------------###
+###  Apply MySQL config customizations
+###----------------------------------------###
+
+cd ~
+sudo rm custom.cnf
+wget https://raw.github.com/aristath/WordPress-Animalia/master/mysql/custom.cnf
+sudo mv custom.cnf /etc/mysql/conf.d/custom.cnf
+sudo service mysql restart
