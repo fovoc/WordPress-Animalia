@@ -120,11 +120,11 @@ sudo ln -s /usr/share/wp-cli/bin/wp /usr/bin/wp
 ###  and create a password for that user.
 ###----------------------------------------###
 
-_DB_NAME=$(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
+_DB_NAME=$(perl -le 'print map { (a..z,A..Z,0..9)[rand 62] } 0..pop' 8)
 
-_DB_USER=$(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
+_DB_USER=$(perl -le 'print map { (a..z,A..Z,0..9)[rand 62] } 0..pop' 8)
 
-_DB_PASS=$(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
+_DB_PASS=$(perl -le 'print map { (a..z,A..Z,0..9)[rand 62] } 0..pop' 8)
 
 echo "CREATE USER 'DB_USER'@'localhost' IDENTIFIED BY 'DB_PASS';" > userdb.sql
 echo "GRANT ALL PRIVILEGES ON * . * TO 'DB_USER'@'localhost';" >> userdb.sql
@@ -194,3 +194,6 @@ sudo service php5-fpm start
 
 sudo service nginx stop
 sudo service nginx start
+
+cd /var/www/$_ROOT_DOMAIN
+wp core config --dbname=$_DB_NAME --dbuser=$_DB_USER --dbpass=$_DB_PASS
