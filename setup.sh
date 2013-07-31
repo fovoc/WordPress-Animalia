@@ -85,7 +85,7 @@ cd ~
 wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/nginx.conf
 sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.old
 sudo mv nginx.conf /etc/nginx/nginx.conf
-sed -i 's/WORKER_PROCESSES/$_CPUS_NUMBER/g' /etc/nginx/nginx.conf
+sed -i "s/WORKER_PROCESSES/$_CPUS_NUMBER/g" /etc/nginx/nginx.conf
 
 wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress.conf
 sudo mv /etc/nginx/conf.d/wordpress.conf /etc/nginx/conf.d/wordpress.conf.old
@@ -96,7 +96,7 @@ wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress-m
 sudo mv /etc/nginx/conf.d/wordpress-mu.conf /etc/nginx/conf.d/wordpress-mu.conf.old
 sudo rm /etc/nginx/conf.d/wordpress-mu.conf
 sudo mv wordpress-mu.conf /etc/nginx/conf.d/wordpress-mu.conf
-sed -i 's/WPDOMAIN/$_ROOT_DOMAIN/g' /etc/nginx/conf.d/wordpress-mu.conf
+sed -i "s/WPDOMAIN/$_ROOT_DOMAIN/g" /etc/nginx/conf.d/wordpress-mu.conf
 
 wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/restrictions.conf
 sudo mv /etc/nginx/conf.d/restrictions.conf /etc/nginx/conf.d/restrictions.conf.old
@@ -129,8 +129,8 @@ _DB_PASS=$(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
 echo "CREATE USER 'DB_USER'@'localhost' IDENTIFIED BY 'DB_PASS';" > userdb.sql
 echo "GRANT ALL PRIVILEGES ON * . * TO 'DB_USER'@'localhost';" >> userdb.sql
 echo "FLUSH PRIVILEGES;" >> userdb.sql
-sed -i 's/DB_USER/$_DB_USER/g' userdb.sql
-sed -i 's/DB_PASS/$_DB_PASS/g' userdb.sql
+sed -i "s/DB_USER/$_DB_USER/g" userdb.sql
+sed -i "s/DB_PASS/$_DB_PASS/g" userdb.sql
 
 mysql -h "localhost" -u root "$_MYSQL_ROOT_PASSWORD" "$_DB_NAME" < "userdb.sql"
 
@@ -153,7 +153,7 @@ cd ~
 wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/domain.conf
 sudo mv /etc/nginx/sites-available/$_ROOT_DOMAIN.conf /etc/nginx/sites-available/$_ROOT_DOMAIN.conf.old
 sudo mv domain.conf /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
-sed -i 's/WPDOMAIN/$_ROOT_DOMAIN/g' /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
+sed -i "s/WPDOMAIN/$_ROOT_DOMAIN/g" /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
 
 cd /etc/nginx/sites-enabled
 ln -s /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
