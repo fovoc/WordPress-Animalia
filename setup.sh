@@ -3,17 +3,17 @@
 ###----------------------------------------###
 
 # Enter your site's domain below.
-_ROOT_DOMAIN = "domain.com"
+_ROOT_DOMAIN="domain.com"
 
 # The MySQL ROOT password.
-_MYSQL_ROOT_PASSWORD = "RANDOM-PASSWORD-HERE"
+_MYSQL_ROOT_PASSWORD="RANDOM-PASSWORD-HERE"
 
 # Use _NGINX_VRSION = "development" below 
 # to use the latest, develoment version
-_NGINX_VERSION = "stable"
+_NGINX_VERSION="stable"
 
 # Enter the number of CPUs that your VPS has.
-_CPUS_NUMBER = "1"
+_CPUS_NUMBER="1"
 
 ###----------------------------------------###
 ###  STOP EDITING,
@@ -120,14 +120,14 @@ sudo ln -s /usr/share/wp-cli/bin/wp /usr/bin/wp
 ###  and create a password for that user.
 ###----------------------------------------###
 
-_DB_NAME = $(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
+_DB_NAME=$(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
 
-_DB_USER = $(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
+_DB_USER=$(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
 
-_DB_PASS = $(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
+_DB_PASS=$(perl -e 'print crypt($ARGV[0], "$RANDOM")' $RANDOM)
 
 echo "CREATE USER 'DB_USER'@'localhost' IDENTIFIED BY 'DB_PASS';" > userdb.sql
-echo "GRANT ALL PRIVILEGES ON * . * TO '_DB_USER'@'localhost';" >> userdb.sql
+echo "GRANT ALL PRIVILEGES ON * . * TO 'DB_USER'@'localhost';" >> userdb.sql
 echo "FLUSH PRIVILEGES;" >> userdb.sql
 sed -i 's/DB_USER/$_DB_USER/g' userdb.sql
 sed -i 's/DB_PASS/$_DB_PASS/g' userdb.sql
@@ -163,10 +163,10 @@ touch /var/www/$_ROOT_DOMAIN/nginx.conf
 ###  Fix Permissions on files
 ###----------------------------------------###
 
-WP_OWNER = www-data # <-- wordpress owner
-WP_GROUP = www-data # <-- wordpress group
-WP_ROOT = /var/www/$_ROOT_DOMAIN # <-- wordpress root directory
-WS_GROUP = www-data # <-- webserver group
+WP_OWNER=www-data # <-- wordpress owner
+WP_GROUP=www-data # <-- wordpress group
+WP_ROOT=/var/www/$_ROOT_DOMAIN # <-- wordpress root directory
+WS_GROUP=www-data # <-- webserver group
  
 # reset to safe defaults
 find ${WP_ROOT} -exec chown ${WP_OWNER}:${WP_GROUP} {} \;
