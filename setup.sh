@@ -96,6 +96,7 @@ wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress-m
 sudo mv /etc/nginx/conf.d/wordpress-mu.conf /etc/nginx/conf.d/wordpress-mu.conf.old
 sudo rm /etc/nginx/conf.d/wordpress-mu.conf
 sudo mv wordpress-mu.conf /etc/nginx/conf.d/wordpress-mu.conf
+sed -i 's/WPDOMAIN/$_ROOT_DOMAIN/g' /etc/nginx/conf.d/wordpress-mu.conf
 
 wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/restrictions.conf
 sudo mv /etc/nginx/conf.d/restrictions.conf /etc/nginx/conf.d/restrictions.conf.old
@@ -104,8 +105,6 @@ sudo mv restrictions.conf /etc/nginx/conf.d/restrictions.conf
 
 sudo mkdir /var/www
 sudo chown -R www-data:www-data /var/www
-
-service nginx start
 
 ###----------------------------------------###
 ###  Install WP-CLI
@@ -152,4 +151,55 @@ cd /var/www
 wget -O wordpress.tar.gz http://wordpress.org/latest.tar.gz
 tar -zxvf wordpress.tar.gz
 chown -R www-data:www-data /var/www/wordpress
-rm wordpress.tar.gz
+sudo rm wordpress.tar.gz
+sudo mv wordpress $_ROOT_DOMAIN
+
+###----------------------------------------###
+###  Configure Nginx for specific domain
+###----------------------------------------###
+
+cd ~
+wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/domain.conf
+sudo mv /etc/nginx/sites-available/$_ROOT_DOMAIN.conf /etc/nginx/sites-available/$_ROOT_DOMAIN.conf.old
+sudo mv domain.conf /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
+sed -i 's/WPDOMAIN/$_ROOT_DOMAIN/g' /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
+
+cd /etc/nginx/sites-enabled
+ln -s /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
+touch /var/www/$_ROOT_DOMAIN/nginx.conf
+
+###----------------------------------------###
+###  Fix Permissions on files
+###----------------------------------------###
+
+WP_OWNER = www-data # <-- wordpress owner
+WP_GROUP = www-data # <-- wordpress group
+WP_ROOT = /var/www/$_ROOT_DOMAIN # <-- wordpress root directory
+WS_GROUP = www-data # <-- webserver group
+ 
+# reset to safe defaults
+find ${WP_ROOT} -exec chown ${WP_OWNER}:${WP_GROUP} {} \;
+find ${WP_ROOT} -type d -exec chmod 755 {} \;
+find ${WP_ROOT} -type f -exec chmod 644 {} \;
+ 
+# allow wordpress to manage wp-config.php (but prevent world access)
+chgrp ${WS_GROUP} ${WP_ROOT}/wp-config.php
+chmod 660 ${WP_ROOT}/wp-config.php
+ 
+# allow wordpress to manage wp-content
+find ${WP_ROOT}/wp-content -exec chgrp ${WS_GROUP} {} \;
+find ${WP_ROOT}/wp-content -type d -exec chmod 775 {} \;
+find ${WP_ROOT}/wp-content -type f -exec chmod 664 {} \;
+
+###----------------------------------------###
+###  Restart all related services
+###----------------------------------------###
+
+sudo service mysql stop
+sudo service mysql start
+
+sudo service php5-fpm stop
+sudo service php5-fpm start
+
+sudo service nginx stop
+sudo service nginx start
