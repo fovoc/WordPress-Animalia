@@ -127,8 +127,10 @@ _DB_USER=$(perl -le 'print map { (a..z,A..Z,0..9)[rand 62] } 0..pop' 8)
 _DB_PASS=$(perl -le 'print map { (a..z,A..Z,0..9)[rand 62] } 0..pop' 8)
 
 echo "CREATE USER 'DB_USER'@'localhost' IDENTIFIED BY 'DB_PASS';" > userdb.sql
+echo "CREATE DATABASE DB_NAME;;" > userdb.sql
 echo "GRANT ALL PRIVILEGES ON * . * TO 'DB_USER'@'localhost';" >> userdb.sql
 echo "FLUSH PRIVILEGES;" >> userdb.sql
+sed -i "s/DB_NAME/$_DB_NAME/g" userdb.sql
 sed -i "s/DB_USER/$_DB_USER/g" userdb.sql
 sed -i "s/DB_PASS/$_DB_PASS/g" userdb.sql
 
