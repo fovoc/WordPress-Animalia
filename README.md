@@ -12,10 +12,14 @@ Installation:
 =============
 
 This must be run on a fresh Ubuntu server, using a root account:
+
 `wget -q https://raw.github.com/aristath/WordPress-Animalia/master/setup.sh && nano setup.sh`
+
 This will download the file and open up an editing screen.
 If you see an error saying that nano is missing, run the following command:
+
 `apt-get install nano`
+
 `nano setup.sh`
 
 On that editing screen you will have to edit the following options:
@@ -27,7 +31,9 @@ Once you edit the options and you make sure they are right, press `Ctrl-X` on yo
 You will be asked if you want to save the changes. PRESS Y.
 
 Now, all you have to do is run this command:
+
 `bash setup.sh`
+
 and the installation script will do the rest for you.
 
 If you want to contribute to the creation and improvement of this script then please feel free to fork it and push any pull requests you wish for consideration.
