@@ -6,43 +6,79 @@
 _ROOT_DOMAIN="domain.com"
 
 # The MySQL ROOT password.
-_MYSQL_ROOT_PASSWORD="RANDOM-PASSWORD-HERE"
+_MYSQL_ROOT_PASSWORD="PASSWORD"
+
+# Enter the number of CPUs that your VPS has.
+_CPUS_NUMBER="1"
+
+# Enter the amount of RAM that you want to use.
+# Default: 512 for a 512M VPS
+_RAM_SIZE=512
+
+# By default we will upgrade the system.
+# If you don't want the system to be updated
+# then set the below to NO.
+_SYSTEM_UPDATE="YES"
+
+# Whether to download the Shoestrap theme or not
+# Set to NO if you don't want to use it.
+_DOWNLOAD_SHOESTRAP="YES"
 
 # Use _NGINX_VRSION = "development" below 
 # to use the latest, develoment version
 _NGINX_VERSION="stable"
-
-# Enter the number of CPUs that your VPS has.
-_CPUS_NUMBER="1"
 
 ###----------------------------------------###
 ###  STOP EDITING,
 ###  DO NOT EDIT BELOW THIS LINE!
 ###----------------------------------------###
 
+WP_OWNER=www-data # <-- wordpress owner
+WP_GROUP=www-data # <-- wordpress group
+WP_ROOT=/var/www/${_ROOT_DOMAIN} # <-- wordpress root directory
+WS_GROUP=www-data # <-- webserver group
+
 ###----------------------------------------###
 ###  Update and upgrade the OS
 ###----------------------------------------###
 
-apt-get install sudo
 sudo apt-get update
-sudo apt-get upgrade --force-yes --quiet --yes
 
-# Install git
-sudo apt-get install git --force-yes --quiet --yes
+# Install any general & required packages
+apt-get install sudo git --force-yes --quiet --yes
+
+if [ "$_SYSTEM_UPDATE" = "YES" ] ; then
+  sudo apt-get upgrade --force-yes --quiet --yes
+fi
+
+###----------------------------------------###
+###  Add any required PPA repositories
+###  and PPA keys.
+###----------------------------------------###
+
+# Install software-common-properties
+sudo apt-get install software-properties-common --force-yes --quiet --yes
+# Add MariaDB PPA
+sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
+sudo add-apt-repository 'deb http://ftp.osuosl.org/pub/mariadb/repo/10.0/ubuntu raring main'
+# Add nginx PPA
+sudo add-apt-repository ppa:nginx/${_NGINX_VERSION}
+# Add PHP-FPM PPA
+sudo add-apt-repository ppa:ondrej/php5 --yes
+
+sudo apt-get update
 
 ###----------------------------------------###
 ###  Install MariaDB and set root password
 ###----------------------------------------###
 
-sudo apt-get install software-properties-common --force-yes --quiet --yes
-sudo apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 0xcbcb082a1bb943db
-sudo add-apt-repository 'deb http://ftp.osuosl.org/pub/mariadb/repo/10.0/ubuntu raring main'
-sudo apt-get update
 sudo apt-get install mariadb-server --force-yes --quiet --yes
 
+# Apply MySQL root password
+# in case it was not set during installation
+
 sudo service mysql stop
-echo "'UPDATE mysql.user SET Password=PASSWORD('$_MYSQL_ROOT_PASSWORD') WHERE User='root';'" > rootpass.txt
+echo "'UPDATE mysql.user SET Password=PASSWORD('${_MYSQL_ROOT_PASSWORD}') WHERE User='root';'" > rootpass.txt
 echo "FLUSH PRIVILEGES;'" >> rootpass.txt
 sudo mysqld_safe --init-file=rootpass.txt &
 sudo service mysql restart
@@ -54,25 +90,19 @@ sudo rm rootpass.txt
 
 cd ~
 sudo rm custom.cnf
-wget https://raw.github.com/aristath/WordPress-Animalia/master/mysql/custom.cnf
+wget -q https://raw.github.com/aristath/WordPress-Animalia/master/mysql/custom.cnf
 sudo mv custom.cnf /etc/mysql/conf.d/custom.cnf
-sudo service mysql restart
 
 ###----------------------------------------###
 ###  Install Nginx
 ###----------------------------------------###
 
-sudo nginx=$_NGINX_VERSION
-sudo add-apt-repository ppa:nginx/$nginx
-sudo apt-get update
 sudo apt-get install nginx --force-yes --quiet --yes
 
 ###----------------------------------------###
 ###  Install PHP-FPM
 ###----------------------------------------###
 
-sudo add-apt-repository ppa:ondrej/php5 --yes
-sudo apt-get update
 sudo apt-get install php5-common php5-mysql php5-xmlrpc php5-cgi php5-curl php5-gd php5-cli php5-fpm php-apc php5-dev php5-mcrypt --force-yes --quiet --yes
 
 ###----------------------------------------###
@@ -82,36 +112,35 @@ sudo apt-get install php5-common php5-mysql php5-xmlrpc php5-cgi php5-curl php5-
 service nginx stop
 
 cd ~
-wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/nginx.conf
+wget -q https://raw.github.com/aristath/WordPress-Animalia/master/nginx/nginx.conf
 sudo mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.old
 sudo mv nginx.conf /etc/nginx/nginx.conf
-sed -i "s/WORKER_PROCESSES/$_CPUS_NUMBER/g" /etc/nginx/nginx.conf
+sed -i "s/WORKER_PROCESSES/${_CPUS_NUMBER}/g" /etc/nginx/nginx.conf
 
-wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress.conf
+wget -q https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress.conf
 sudo mv /etc/nginx/conf.d/wordpress.conf /etc/nginx/conf.d/wordpress.conf.old
 sudo rm /etc/nginx/conf.d/wordpress.conf
 sudo mv wordpress.conf /etc/nginx/conf.d/wordpress.conf
 
-wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress-mu.conf
+wget -q https://raw.github.com/aristath/WordPress-Animalia/master/nginx/wordpress-mu.conf
 sudo mv /etc/nginx/conf.d/wordpress-mu.conf /etc/nginx/conf.d/wordpress-mu.conf.old
 sudo rm /etc/nginx/conf.d/wordpress-mu.conf
 sudo mv wordpress-mu.conf /etc/nginx/conf.d/wordpress-mu.conf
-sed -i "s/WPDOMAIN/$_ROOT_DOMAIN/g" /etc/nginx/conf.d/wordpress-mu.conf
+sed -i "s/WPDOMAIN/${_ROOT_DOMAIN}/g" /etc/nginx/conf.d/wordpress-mu.conf
 
-wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/restrictions.conf
+wget -q https://raw.github.com/aristath/WordPress-Animalia/master/nginx/restrictions.conf
 sudo mv /etc/nginx/conf.d/restrictions.conf /etc/nginx/conf.d/restrictions.conf.old
 sudo rm /etc/nginx/conf.d/restrictions.conf
 sudo mv restrictions.conf /etc/nginx/conf.d/restrictions.conf
 
 sudo mkdir /var/www
-sudo chown -R www-data:www-data /var/www
 
 ###----------------------------------------###
 ###  Install WP-CLI
 ###----------------------------------------###
 
 curl http://wp-cli.org/installer.sh > installer.sh
-sudo INSTALL_DIR='/usr/share/wp-cli' bash installer.sh
+INSTALL_DIR='/usr/share/wp-cli' bash installer.sh
 sudo ln -s /usr/share/wp-cli/bin/wp /usr/bin/wp
 
 ###----------------------------------------###
@@ -126,50 +155,39 @@ _DB_USER=$(perl -le 'print map { (a..z,A..Z,0..9)[rand 62] } 0..pop' 8)
 
 _DB_PASS=$(perl -le 'print map { (a..z,A..Z,0..9)[rand 62] } 0..pop' 8)
 
-echo "CREATE USER 'DB_USER'@'localhost' IDENTIFIED BY 'DB_PASS';" > userdb.sql
-echo "CREATE DATABASE DB_NAME;" >> userdb.sql
-echo "GRANT ALL PRIVILEGES ON DB_NAME.* TO 'DB_USER'@'localhost' IDENTIFIED BY 'DB_PASS';" >> userdb.sql
-echo "FLUSH PRIVILEGES;" >> userdb.sql
-sed -i "s/DB_NAME/$_DB_NAME/g" userdb.sql
-sed -i "s/DB_USER/$_DB_USER/g" userdb.sql
-sed -i "s/DB_PASS/$_DB_PASS/g" userdb.sql
-
-mysql -h "localhost" -u root "$_MYSQL_ROOT_PASSWORD" "$_DB_NAME" < "userdb.sql"
+mysql -u root -p${_MYSQL_ROOT_PASSWORD} -e "CREATE USER '${_DB_USER}'@'localhost' IDENTIFIED BY '${_DB_PASS}';"
+mysql -u root -p${_MYSQL_ROOT_PASSWORD} -e "CREATE DATABASE ${_DB_NAME};"
+mysql -u root -p${_MYSQL_ROOT_PASSWORD} -e "GRANT ALL PRIVILEGES ON ${_DB_NAME}.* TO '${_DB_USER}'@'localhost' IDENTIFIED BY '${_DB_PASS}';"
+mysql -u root -p${_MYSQL_ROOT_PASSWORD} -e "FLUSH PRIVILEGES;"
 
 ###----------------------------------------###
 ###  Download and extract WordPress
 ###----------------------------------------###
 
 cd /var/www
-wget -O wordpress.tar.gz http://wordpress.org/latest.tar.gz
-tar -zxvf wordpress.tar.gz
-chown -R www-data:www-data /var/www/wordpress
+wget -q -O wordpress.tar.gz http://wordpress.org/latest.tar.gz
+tar -zxf wordpress.tar.gz
 sudo rm wordpress.tar.gz
-sudo mv wordpress $_ROOT_DOMAIN
+sudo mv wordpress ${_ROOT_DOMAIN}
 
 ###----------------------------------------###
 ###  Configure Nginx for specific domain
 ###----------------------------------------###
 
 cd ~
-wget https://raw.github.com/aristath/WordPress-Animalia/master/nginx/domain.conf
-sudo mv /etc/nginx/sites-available/$_ROOT_DOMAIN.conf /etc/nginx/sites-available/$_ROOT_DOMAIN.conf.old
-sudo mv domain.conf /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
-sed -i "s/WPDOMAIN/$_ROOT_DOMAIN/g" /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
+wget -q https://raw.github.com/aristath/WordPress-Animalia/master/nginx/domain.conf
+sudo mv /etc/nginx/sites-available/${_ROOT_DOMAIN}.conf /etc/nginx/sites-available/${_ROOT_DOMAIN}.conf.old
+sudo mv domain.conf /etc/nginx/sites-available/${_ROOT_DOMAIN}.conf
+sed -i "s/WPDOMAIN/${_ROOT_DOMAIN}/g" /etc/nginx/sites-available/${_ROOT_DOMAIN}.conf
 
 cd /etc/nginx/sites-enabled
-ln -s /etc/nginx/sites-available/$_ROOT_DOMAIN.conf
-touch /var/www/$_ROOT_DOMAIN/nginx.conf
+ln -s /etc/nginx/sites-available/${_ROOT_DOMAIN}.conf
+touch ${WP_ROOT}/nginx.conf
 
 ###----------------------------------------###
 ###  Fix Permissions on files
 ###----------------------------------------###
 
-WP_OWNER=www-data # <-- wordpress owner
-WP_GROUP=www-data # <-- wordpress group
-WP_ROOT=/var/www/$_ROOT_DOMAIN # <-- wordpress root directory
-WS_GROUP=www-data # <-- webserver group
- 
 # reset to safe defaults
 find ${WP_ROOT} -exec chown ${WP_OWNER}:${WP_GROUP} {} \;
 find ${WP_ROOT} -type d -exec chmod 755 {} \;
@@ -197,5 +215,5 @@ sudo service php5-fpm start
 sudo service nginx stop
 sudo service nginx start
 
-cd /var/www/$_ROOT_DOMAIN
-wp core config --dbname=$_DB_NAME --dbuser=$_DB_USER --dbpass=$_DB_PASS
+cd ${WP_ROOT}
+wp core config --dbname=${_DB_NAME} --dbuser=${_DB_USER} --dbpass=${_DB_PASS}
