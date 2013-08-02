@@ -13,16 +13,14 @@ _CPUS_NUMBER="1"
 
 # Enter the amount of RAM that you want to use.
 # Default: 512 for a 512M VPS
+# WARNING: THIS IS NOT YET IMPLEMENTED.
 _RAM_SIZE=512
 
 # By default we will upgrade the system.
 # If you don't want the system to be updated
 # then set the below to NO.
+# WARNING: THIS IS NOT YET IMPLEMENTED.
 _SYSTEM_UPDATE="YES"
-
-# Whether to download the Shoestrap theme or not
-# Set to NO if you don't want to use it.
-_DOWNLOAD_SHOESTRAP="YES"
 
 # Use _NGINX_VRSION = "development" below 
 # to use the latest, develoment version
